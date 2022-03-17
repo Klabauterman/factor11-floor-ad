@@ -150,11 +150,11 @@ function loadAd() {
     window
       .getGDPRString()
       .then((gdpr) => {
-          if (!gdpr) {
+        if (!gdpr) {
             console.error("CONSENT NOT LOADED");
-              return;
-          }
-         
+            return;
+        }
+
         var params = `pid=${config.pid}&gdpr=${gdpr.gdprApplies}&gdpr_consent=${gdpr.consentstring}`;
         const ad = document.createElement("ins");
         ad.classList.add("asm_async_creative");
@@ -183,7 +183,6 @@ const adContainer = document.createElement("div");
 adContainer.id = "ad-container";
 floorContainer.appendChild(adContainer);
 
-//TODO: buttons
 var phosphor = document.createElement("script");
 phosphor.src = "https://unpkg.com/phosphor-icons";
 document.head.appendChild(phosphor);
@@ -213,9 +212,4 @@ floorContainer.appendChild(upper);
 
 document.currentScript.parentElement.appendChild(floorAd);
 loadAd();
-
-//TODO: removable by container
-//TODO: hosting
-//TODO: minimalbeispiel
-//TODO: readme
   
