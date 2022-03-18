@@ -171,6 +171,8 @@ async function loadAd() {
         ad.setAttribute("data-asm-params", params);
         document.getElementById("ad-container").appendChild(ad);
 
+        //this seem not to work in safari
+        //window.addEventListener("message", onMessage);
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
               if (mutation.type === "childList") {
