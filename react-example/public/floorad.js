@@ -1,7 +1,4 @@
-var this_js_script = document.currentScript;
-
-var t = this_js_script.getAttribute("test");
-console.log(t);
+var container = document.currentScript.parentElement;
 
 if (!document.currentScript.getAttribute("data-asm-cdn")) {
     console.error("data-asm-cdn attribute missing")
@@ -105,17 +102,23 @@ style.innerHTML = `
  `;
 document.getElementsByTagName('head')[0].appendChild(style);
 
-function onMessage() {
+async function onMessage() {
+    console.log("MESSAGE RECEIVED");
     const result = document
         .getElementById("floor-ad")
         ?.querySelectorAll("iframe");
-      const container = document.getElementById("floor-ad");
-      if (/*result?.length && */!container?.getAttribute("loaded")) {
+    
+    if (!result?.length) {
+        console.log("MISSING IFRAME");
+    }
+        
+    const container = document.getElementById("floor-ad");
+    if (result?.length && !container?.getAttribute("loaded")) {
+        console.log("SHOW AD");
         container?.setAttribute("loaded", "true");
         setVisible(true);
-      }
+    }
 };
-window.addEventListener("message", onMessage);
 
 var expanded = false;
 var hidden = true;
@@ -146,7 +149,12 @@ function setVisible(value) {
     }
 }
 
-function loadAd() {
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function loadAd() {
+    await timeout(1000);
     window
       .getGDPRString()
       .then((gdpr) => {
@@ -163,11 +171,24 @@ function loadAd() {
         ad.setAttribute("data-asm-params", params);
         document.getElementById("ad-container").appendChild(ad);
 
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              if (mutation.type === "childList") {
+                console.log("attributes changed")
+                onMessage();
+              }
+            });
+          });
+          
+          observer.observe(ad, {
+            childList: true
+          });
+
         var script = document.createElement("script");
         script.src = config.adScript;
         script.async = true;
 
-        document.currentScript.parentElement.appendChild(script);
+        container.appendChild(script);
       });
 }
 
@@ -210,6 +231,6 @@ expandIcon.classList.add("ph-arrow-circle-up");
 upper.appendChild(expandIcon);
 floorContainer.appendChild(upper);
 
-document.currentScript.parentElement.appendChild(floorAd);
+container.appendChild(floorAd);
 loadAd();
   

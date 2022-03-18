@@ -9,3 +9,11 @@
    - data-asm-host
    - ad-loader (should be "https://cdn-de.f11-ads.com/adasync.min.js")
    - pid
+
+## Hosted Demo
+
+https://factor11-floor-ad.web.app/
+
+## Hosted Script
+
+https://factor11-floor-ad.web.app/floorad.js

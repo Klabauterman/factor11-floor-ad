@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     const floorAd = document.createElement("div");
     const script = document.createElement("script");
-    script.src = "https://factor11-floor-ad.web.app/floorad.js";
+    script.src = "floorad.js";
     script.setAttribute("data-asm-cdn", config.dataAsmCdn);
     script.setAttribute("data-asm-host", config.dataAsmHost);
     script.setAttribute("ad-loader", config.adScript);
