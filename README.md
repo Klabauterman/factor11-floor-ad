@@ -1,5 +1,7 @@
 # factor11-floor-ad
 
+This floor ad is an expandable 300x50 Banner. The expanded size is 300x600 and it has an expand/collapse-button and a close button.
+
 ## Steps to integrate
 
 load script with parameters:
