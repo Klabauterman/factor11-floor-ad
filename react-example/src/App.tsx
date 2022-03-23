@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
@@ -9,8 +9,31 @@ const config = {
   pid: "346",
 };
 
+interface GDPR {
+  gdprApplies: boolean;
+  consentstring: string;
+}
+
+function timeout(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function App() {
+  const [gdpr, setGdpr] = useState<GDPR | undefined>();
+
   useEffect(() => {
+    timeout(1000).then(() =>
+      window
+        //@ts-ignore
+        .getGDPRString()
+        .then(setGdpr)
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!gdpr) {
+      return;
+    }
     const floorAd = document.createElement("div");
     const script = document.createElement("script");
     script.src = "floorad.js";
@@ -18,6 +41,8 @@ function App() {
     script.setAttribute("data-asm-host", config.dataAsmHost);
     script.setAttribute("ad-loader", config.adScript);
     script.setAttribute("pid", config.pid);
+    script.setAttribute("gdpr", gdpr.gdprApplies ? "1" : "0");
+    script.setAttribute("gdpr_consent", gdpr.consentstring);
     script.async = true;
     document.body.appendChild(floorAd);
     floorAd.appendChild(script);
@@ -25,7 +50,7 @@ function App() {
     return () => {
       document.body.removeChild(floorAd);
     };
-  }, []);
+  }, [gdpr]);
 
   return (
     <div className="App">

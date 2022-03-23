@@ -1,27 +1,23 @@
 var container = document.currentScript.parentElement;
 
-if (!document.currentScript.getAttribute("data-asm-cdn")) {
-    console.error("data-asm-cdn attribute missing")
-}
-
-if (!document.currentScript.getAttribute("data-asm-host")) {
-    console.error("data-asm-host attribute missing")
-}
-
-if (!document.currentScript.getAttribute("ad-loader")) {
-    console.error("ad-loader attribute missing")
-}
-
 if (!document.currentScript.getAttribute("pid")) {
     console.error("pid attribute missing")
+}
+
+if (!document.currentScript.getAttribute("gdpr")) {
+    console.error("gdpr attribute missing (should be 0 or 1)")
+}
+
+if (!document.currentScript.getAttribute("gdpr_consent")) {
+    console.error("gdpr_consent attribute missing")
 }
 
 var config = {
     buttonBackground: document.currentScript.getAttribute("button-background") ?? "#4E2CA3",
     buttonForeground: document.currentScript.getAttribute("button-foreground") ?? "white",
-    dataAsmCdn: document.currentScript.getAttribute("data-asm-cdn"),
-    dataAsmHost: document.currentScript.getAttribute("data-asm-host"),
-    adScript: document.currentScript.getAttribute("ad-loader"),
+    dataAsmCdn: document.currentScript.getAttribute("data-asm-cdn") ?? "cdn-de.f11-ads.com",
+    dataAsmHost: document.currentScript.getAttribute("data-asm-host") ?? "ads.qualitymedianetwork.de",
+    adScript: document.currentScript.getAttribute("ad-loader") ?? "https://cdn-de.f11-ads.com/adasync.min.js",
     pid: document.currentScript.getAttribute("pid")
 };
 
@@ -100,20 +96,10 @@ style.innerHTML = `
 
  
  `;
-document.getElementsByTagName('head')[0].appendChild(style);
+document.getElementsByTagName('head')[0].appendChild(style);   
 
-async function onMessage() {
-    console.log("MESSAGE RECEIVED");
-    const result = document
-        .getElementById("floor-ad")
-        ?.querySelectorAll("iframe");
-    
-    if (!result?.length) {
-        console.log("MISSING IFRAME");
-    }
-        
-    const container = document.getElementById("floor-ad");
-    if (result?.length && !container?.getAttribute("loaded")) {
+async function onMessage(message) {
+    if (message.data.type === "floorad" && message.data.status === "loaded" && !container?.getAttribute("loaded")) {
         console.log("SHOW AD");
         container?.setAttribute("loaded", "true");
         setVisible(true);
@@ -149,49 +135,22 @@ function setVisible(value) {
     }
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function loadAd() {
-    await timeout(1000);
-    window
-      .getGDPRString()
-      .then((gdpr) => {
-        if (!gdpr) {
-            console.error("CONSENT NOT LOADED");
-            return;
-        }
+    var gdpr = document.currentScript.getAttribute("gdpr");
+    var consent = document.currentScript.getAttribute("gdpr_consent");
+    var params = `pid=${config.pid}&gdpr=${gdpr}&gdpr_consent=${consent}`;
+    const ad = document.createElement("ins");
+    ad.classList.add("asm_async_creative");
+    ad.setAttribute("data-asm-cdn", config.dataAsmCdn);
+    ad.setAttribute("data-asm-host", config.dataAsmHost);
+    ad.setAttribute("data-asm-params", params);
+    document.getElementById("ad-container").appendChild(ad);
 
-        var params = `pid=${config.pid}&gdpr=${gdpr.gdprApplies}&gdpr_consent=${gdpr.consentstring}`;
-        const ad = document.createElement("ins");
-        ad.classList.add("asm_async_creative");
-        ad.setAttribute("data-asm-cdn", config.dataAsmCdn);
-        ad.setAttribute("data-asm-host", config.dataAsmHost);
-        ad.setAttribute("data-asm-params", params);
-        document.getElementById("ad-container").appendChild(ad);
+    var script = document.createElement("script");
+    script.src = config.adScript;
+    script.async = true;
 
-        //this seem not to work in safari
-        //window.addEventListener("message", onMessage);
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-              if (mutation.type === "childList") {
-                console.log("attributes changed")
-                onMessage();
-              }
-            });
-          });
-          
-          observer.observe(ad, {
-            childList: true
-          });
-
-        var script = document.createElement("script");
-        script.src = config.adScript;
-        script.async = true;
-
-        container.appendChild(script);
-      });
+    container.appendChild(script);
 }
 
 const floorAd = document.createElement("div");
@@ -234,5 +193,6 @@ upper.appendChild(expandIcon);
 floorContainer.appendChild(upper);
 
 container.appendChild(floorAd);
+window.addEventListener("message", onMessage);
 loadAd();
   

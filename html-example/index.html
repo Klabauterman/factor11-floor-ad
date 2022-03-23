@@ -33,9 +33,25 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root">
-
-      <div id="floor-ad-example">
-        <script src="https://factor11-floor-ad.web.app/floorad.js" data-asm-cdn="cdn-de.f11-ads.com" data-asm-host="ads.qualitymedianetwork.de" ad-loader="https://cdn-de.f11-ads.com/adasync.min.js" pid="346">
+      <div id="example">
+        <script>
+          function timeout(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+          }
+          timeout(1000).then(() =>
+            window.getGDPRString().then((gdpr) => {
+              var script = document.createElement("script");
+              script.src = "https://factor11-floor-ad.web.app/floorad.js";
+              script.setAttribute("data-asm-cdn", "cdn-de.f11-ads.com");
+              script.setAttribute("data-asm-host", "ads.qualitymedianetwork.de");
+              script.setAttribute("ad-loader", "https://cdn-de.f11-ads.com/adasync.min.js");
+              script.setAttribute("pid", "346");
+              script.setAttribute("gdpr", gdpr.gdprApplies ? "1" : "0");
+              script.setAttribute("gdpr_consent", gdpr.consentstring);
+              script.async = true;
+              document.body.appendChild(script);
+            })
+          );
         </script>
       </div>
     </div>
